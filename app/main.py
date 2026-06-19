@@ -1,0 +1,18 @@
+"""FastAPI entrypoint. Assembles the app and wires up the routes."""
+
+from fastapi import FastAPI
+
+from app.core.config import get_settings
+from app.routes import health, recommendations
+
+settings = get_settings()
+
+app = FastAPI(title=settings.app_name, debug=settings.debug)
+
+app.include_router(health.router, prefix=settings.api_v1_prefix)
+app.include_router(recommendations.router, prefix=settings.api_v1_prefix)
+
+
+@app.get("/")
+def root() -> dict[str, str]:
+    return {"app": settings.app_name, "docs": "/docs"}

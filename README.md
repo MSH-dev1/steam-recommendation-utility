@@ -1,0 +1,50 @@
+# Steam Recommendation Utility
+
+A web app that recommends Steam games based on a user's library
+(what they own, what they've liked, how many hours they've played). Hybrid approach:
+content-based filtering + an LLM layer on top of the data.
+
+Stack: FastAPI + Jinja2 + HTMX, PostgreSQL (SQLAlchemy + Alembic), Docker.
+
+## Running
+
+```bash
+cp .env.example .env       # adjust values if needed
+docker compose up --build
+```
+
+- App: http://localhost:8000
+- Swagger (API docs): http://localhost:8000/docs
+- Health check: http://localhost:8000/api/v1/health
+
+Health returns `{"status": "ok", "db": "ok"}` when the service is up and can reach the DB.
+
+## Project layout (layered architecture)
+
+```
+app/
+├── core/        # config (env via pydantic-settings)
+├── db/          # DB connection, base model class
+├── models/      # ORM models (added in step 2)
+├── schemas/     # Pydantic schemas (contracts)
+├── services/    # business logic, HTTP-agnostic
+│   └── recommendations/   # recommender boundary: base / stub / factory
+└── routes/      # HTTP layer
+```
+
+Recommendations are always called through `get_recommender().get_recommendations(user_id)`.
+The implementation (stub -> content-based -> LLM) changes behind this boundary
+without touching the rest of the codebase.
+
+## Current stage
+
+Step 1 of the roadmap: skeleton (FastAPI, health check, Docker, Postgres, a stub
+recommender behind an interface). Login and real Steam data aren't wired up yet -
+those are steps 2-4.
+
+## Development
+
+```bash
+ruff check app/
+black app/
+```
