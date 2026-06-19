@@ -9,7 +9,7 @@ from app.core.config import get_settings
 from app.db.session import Base
 
 # Models are imported here so autogenerate can see them.
-# At step 2 this appears: from app.models import user  # noqa
+from app.models import user  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
