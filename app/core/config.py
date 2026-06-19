@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     # Steam (filled in at step 2-3, may be empty at start)
     steam_api_key: str = ""
 
+    # Secret used to sign session cookies. Required, no safe default.
+    session_secret: str
+
 
 @lru_cache
 def get_settings() -> Settings:
