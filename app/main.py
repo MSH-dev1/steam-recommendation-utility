@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 
 from app.core.config import get_settings
-from app.routes import health, recommendations
+from app.routes import auth, health, recommendations
 
 settings = get_settings()
 
@@ -11,6 +11,7 @@ app = FastAPI(title=settings.app_name, debug=settings.debug)
 
 app.include_router(health.router, prefix=settings.api_v1_prefix)
 app.include_router(recommendations.router, prefix=settings.api_v1_prefix)
+app.include_router(auth.router, prefix=settings.api_v1_prefix)
 
 
 @app.get("/")

@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     app_name: str = "Steam Recommendation Utility"
     api_v1_prefix: str = "/api/v1"
     debug: bool = False
+    base_url: str = "http://localhost:8000"
 
     # Database
     database_url: str = "postgresql+psycopg://postgres:postgres@db:5432/steamrec"
