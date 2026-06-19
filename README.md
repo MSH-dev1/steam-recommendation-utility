@@ -25,7 +25,7 @@ Health returns `{"status": "ok", "db": "ok"}` when the service is up and can rea
 app/
 ├── core/        # config (env via pydantic-settings)
 ├── db/          # DB connection, base model class
-├── models/      # ORM models (added in step 2)
+├── models/      # ORM models (User added in step 2)
 ├── schemas/     # Pydantic schemas (contracts)
 ├── services/    # business logic, HTTP-agnostic
 │   └── recommendations/   # recommender boundary: base / stub / factory
@@ -38,9 +38,12 @@ without touching the rest of the codebase.
 
 ## Current stage
 
-Step 1 of the roadmap: skeleton (FastAPI, health check, Docker, Postgres, a stub
-recommender behind an interface). Login and real Steam data aren't wired up yet -
-those are steps 2-4.
+Step 1 (skeleton: FastAPI, health check, Docker, Postgres, a stub recommender behind
+an interface) and Step 2 (User model + migration, Steam OpenID login implemented
+manually, server-side sessions with `/auth/me` and `/auth/logout`) are done.
+
+Next up: steps 3-4 - fetch the logged-in user's Steam library via the Steam API and
+persist it.
 
 ## Development
 
