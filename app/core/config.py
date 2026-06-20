@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     # Secret used to sign session cookies. Required, no safe default.
     session_secret: str
 
+    # RAWG (game metadata: genres/tags). Filled in at step 5.
+    rawg_api_key: str
+
 
 @lru_cache
 def get_settings() -> Settings:

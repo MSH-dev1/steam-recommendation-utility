@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import get_settings
-from app.routes import auth, health, library, recommendations
+from app.routes import auth, health, library, rawg_test, recommendations
 
 settings = get_settings()
 
@@ -21,6 +21,7 @@ app.include_router(health.router, prefix=settings.api_v1_prefix)
 app.include_router(recommendations.router, prefix=settings.api_v1_prefix)
 app.include_router(auth.router, prefix=settings.api_v1_prefix)
 app.include_router(library.router, prefix=settings.api_v1_prefix)
+app.include_router(rawg_test.router, prefix=settings.api_v1_prefix)
 
 
 @app.get("/")
