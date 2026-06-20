@@ -6,8 +6,8 @@ the rest of the code keeps calling get_recommender().get_recommendations().
 """
 
 from app.services.recommendations.base import RecommenderBase
-from app.services.recommendations.stub import StubRecommender
+from app.services.recommendations.content_based import ContentBasedRecommender
 
 
 def get_recommender() -> RecommenderBase:
-    return StubRecommender()
+    return ContentBasedRecommender()
