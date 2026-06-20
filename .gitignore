@@ -1,6 +1,9 @@
 # Secrets
 .env
 
+# DB dumps/backups
+*.sql
+
 # Python
 __pycache__/
 *.py[cod]

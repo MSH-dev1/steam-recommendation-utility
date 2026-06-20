@@ -1,4 +1,4 @@
-"""Game model. Genres/tags come from RAWG metadata enrichment (step 5)."""
+"""Game model. Catalog entries from RAWG may have no Steam appid at all."""
 
 from datetime import datetime
 
@@ -13,11 +13,12 @@ from app.models.tag import Tag
 
 
 class Game(Base):
-    """A Steam game, identified by its Steam appid."""
+    """A game, optionally tied to a Steam appid (catalog-only games have none)."""
 
     __tablename__ = "games"
 
-    appid: Mapped[int] = mapped_column(primary_key=True, autoincrement=False)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    appid: Mapped[int | None] = mapped_column(nullable=True, unique=True, index=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
 
     # RAWG enrichment state. rawg_id is null until matched (or never, if rawg_match_failed).

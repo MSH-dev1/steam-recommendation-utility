@@ -31,8 +31,8 @@ def sync_user_library(
         owned_games = steam_client.get_owned_games(user.steam_id)
         profile = steam_client.get_player_summary(user.steam_id)
 
-        _upsert_games(db, owned_games)
-        _upsert_user_games(db, user.id, owned_games)
+        games_by_appid = _upsert_games(db, owned_games)
+        _upsert_user_games(db, user.id, owned_games, games_by_appid)
 
         if profile is not None:
             user.personaname = profile.personaname
@@ -53,10 +53,14 @@ def _is_stale(last_synced_at: datetime | None, ttl_hours: int) -> bool:
     return datetime.now(timezone.utc) - last_synced_at >= timedelta(hours=ttl_hours)
 
 
-def _upsert_games(db: Session, owned_games: list[OwnedGame]) -> None:
-    """Create or update the games table for the given owned games, in bulk."""
+def _upsert_games(db: Session, owned_games: list[OwnedGame]) -> dict[int, Game]:
+    """Create or update the games table for the given owned games, in bulk.
+
+    Returns a mapping of Steam appid -> Game (with id populated) for use by
+    _upsert_user_games, which links on the surrogate game_id, not appid.
+    """
     if not owned_games:
-        return
+        return {}
 
     appids = [game.appid for game in owned_games]
     existing_games = {game.appid: game for game in db.query(Game).filter(Game.appid.in_(appids))}
@@ -64,25 +68,33 @@ def _upsert_games(db: Session, owned_games: list[OwnedGame]) -> None:
     for owned_game in owned_games:
         existing = existing_games.get(owned_game.appid)
         if existing is None:
-            db.add(Game(appid=owned_game.appid, name=owned_game.name))
+            game = Game(appid=owned_game.appid, name=owned_game.name)
+            db.add(game)
+            db.flush()
+            existing_games[owned_game.appid] = game
         elif existing.name != owned_game.name:
             existing.name = owned_game.name
 
+    return existing_games
 
-def _upsert_user_games(db: Session, user_id: int, owned_games: list[OwnedGame]) -> None:
+
+def _upsert_user_games(
+    db: Session, user_id: int, owned_games: list[OwnedGame], games_by_appid: dict[int, Game]
+) -> None:
     """Create or update user_games rows for the given owned games, in bulk."""
     existing_rows = {
-        row.appid: row
+        row.game_id: row
         for row in db.query(UserGame).filter(UserGame.user_id == user_id)
     }
 
     for owned_game in owned_games:
-        existing = existing_rows.get(owned_game.appid)
+        game_id = games_by_appid[owned_game.appid].id
+        existing = existing_rows.get(game_id)
         if existing is None:
             db.add(
                 UserGame(
                     user_id=user_id,
-                    appid=owned_game.appid,
+                    game_id=game_id,
                     playtime_forever=owned_game.playtime_forever,
                 )
             )

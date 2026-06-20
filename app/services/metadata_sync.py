@@ -7,11 +7,8 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.models.game import Game
-from app.models.game_genre import GameGenre
-from app.models.game_tag import GameTag
-from app.models.genre import Genre
-from app.models.tag import Tag
 from app.schemas.rawg import RawgGame
+from app.services.game_metadata import get_or_create_genre, get_or_create_tag
 from app.services.rawg_client import RawgAPIError, RawgClient
 
 
@@ -92,25 +89,7 @@ def _count_candidates(db: Session, ttl_days: int) -> int:
 
 def _apply_metadata(db: Session, game: Game, rawg_game: RawgGame) -> None:
     """Upsert genres/tags and link them to the game, then update sync state."""
-    game.genres = [_get_or_create_genre(db, name) for name in rawg_game.genres]
-    game.tags = [_get_or_create_tag(db, name) for name in rawg_game.tags]
+    game.genres = [get_or_create_genre(db, name) for name in rawg_game.genres]
+    game.tags = [get_or_create_tag(db, name) for name in rawg_game.tags]
     game.rawg_id = rawg_game.rawg_id
     game.metadata_synced_at = datetime.now(timezone.utc)
-
-
-def _get_or_create_genre(db: Session, name: str) -> Genre:
-    genre = db.query(Genre).filter(Genre.name == name).first()
-    if genre is None:
-        genre = Genre(name=name)
-        db.add(genre)
-        db.flush()
-    return genre
-
-
-def _get_or_create_tag(db: Session, name: str) -> Tag:
-    tag = db.query(Tag).filter(Tag.name == name).first()
-    if tag is None:
-        tag = Tag(name=name)
-        db.add(tag)
-        db.flush()
-    return tag

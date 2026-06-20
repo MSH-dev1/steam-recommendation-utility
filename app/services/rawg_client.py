@@ -42,6 +42,35 @@ class RawgClient:
 
         return self.get_game_by_id(results[0]["id"])
 
+    def list_popular_games(self, page: int, page_size: int = 40) -> list[RawgGame]:
+        """Fetch a page of popular games, ordered by how many users added them.
+
+        The list endpoint includes genres but not full tag data, so results
+        here have an empty tags list. Full tag enrichment happens later via
+        get_game_by_id, reusing the existing enrichment mechanism.
+        """
+        url = f"{RAWG_API_BASE_URL}/games"
+        params = {
+            "key": self._api_key,
+            "ordering": "-added",
+            "page": str(page),
+            "page_size": str(page_size),
+        }
+        data = self._get_json(url, params)
+
+        return [
+            RawgGame(
+                rawg_id=item["id"],
+                name=item["name"],
+                slug=item["slug"],
+                genres=[genre["name"] for genre in item.get("genres", [])],
+                tags=[],
+                released=item.get("released"),
+                rating=item.get("rating"),
+            )
+            for item in data.get("results", [])
+        ]
+
     def get_game_by_id(self, rawg_id: int) -> RawgGame | None:
         """Fetch full details (including genres/tags) for a known RAWG id."""
         url = f"{RAWG_API_BASE_URL}/games/{rawg_id}"

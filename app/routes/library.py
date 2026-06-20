@@ -32,7 +32,7 @@ def get_my_library(
 
     rows = (
         db.query(UserGame, Game)
-        .join(Game, UserGame.appid == Game.appid)
+        .join(Game, UserGame.game_id == Game.id)
         .filter(UserGame.user_id == user.id)
         .order_by(UserGame.playtime_forever.desc())
         .all()
