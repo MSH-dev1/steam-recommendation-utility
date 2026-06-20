@@ -10,6 +10,8 @@ from app.models.game import Game
 from app.models.user import User
 from app.models.user_game import UserGame
 from app.services.library_sync import sync_user_library
+from app.services.metadata_sync import enrich_games
+from app.services.rawg_client import RawgClient
 from app.services.steam_client import SteamClient
 
 router = APIRouter(prefix="/library", tags=["library"])
@@ -49,3 +51,17 @@ def get_my_library(
         "games": games,
         "sync": {**sync_result, "last_synced_at": user.last_synced_at},
     }
+
+
+@router.post("/enrich")
+def enrich_library(
+    limit: int = 20,
+    user: User | None = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict[str, object]:
+    if user is None:
+        raise HTTPException(status_code=401, detail="Not logged in")
+
+    settings = get_settings()
+    client = RawgClient(settings.rawg_api_key)
+    return enrich_games(db, client, limit=limit)
