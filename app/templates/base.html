@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" data-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ t("landing.title") }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="/static/custom.css">
+    <script src="https://unpkg.com/htmx.org" defer></script>
+</head>
+<body>
+    <header class="container">
+        <nav>
+            <ul>
+                <li><strong><a href="/">{{ t("landing.title") }}</a></strong></li>
+            </ul>
+            <ul>
+                {% if user %}
+                    <li><a href="/api/v1/recommendations">{{ t("nav.recommendations") }}</a></li>
+                    <li>{{ user.personaname or user.steam_id }}</li>
+                    <li><a href="/api/v1/auth/logout">{{ t("nav.logout") }}</a></li>
+                {% else %}
+                    <li><a href="/api/v1/auth/steam/login">{{ t("nav.login") }}</a></li>
+                {% endif %}
+                <li>
+                    <a href="/set-lang/en" {% if lang == "en" %}aria-current="true"{% endif %}>EN</a>
+                    /
+                    <a href="/set-lang/ru" {% if lang == "ru" %}aria-current="true"{% endif %}>RU</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="container">
+        <small>
+            {{ t("footer.rawg_attribution") }} &middot; {{ t("footer.copyright") }}
+        </small>
+    </footer>
+</body>
+</html>

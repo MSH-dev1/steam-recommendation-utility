@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<article>
+    <h1>{{ t("landing.title") }}</h1>
+    <p>{{ t("landing.description") }}</p>
+
+    {% if user %}
+        <a role="button" href="/api/v1/recommendations">{{ t("landing.view_recommendations") }}</a>
+    {% else %}
+        <a role="button" href="/api/v1/auth/steam/login">{{ t("landing.cta") }}</a>
+    {% endif %}
+</article>
+{% endblock %}
